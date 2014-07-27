@@ -44,7 +44,9 @@ def ParseErrorLog(infile, pattern, order, dir_pattern):
             filename = m.group(int(patternOrder[0]))
             lineNo = m.group(int(patternOrder[1]))
             errorMsg = m.group(int(patternOrder[2]))
-            errorList.append((projdir+filename, lineNo, errorMsg))
+            if not os.path.isabs(filename):
+                filename = projdir + filename
+            errorList.append((filename, lineNo, errorMsg))
             continue
     lines = []
     for i in errorList:

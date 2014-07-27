@@ -24,7 +24,7 @@ command! -nargs=1 -complete=file REefmtVS
             \ :let g:regex_efmt_config = ['1>(.+)\(([0-9]+)\):(.+$)', [1, 2, 3], ''] |
             \ execute(":REefmt " . <f-args>)
 command! -nargs=1 -complete=file REefmtMK 
-            \ :let g:regex_efmt_config = ["(.+):([0-9]+):(.+$)", [1, 2, 3], "make: Entering directory '(.+)'"] |
+            \ :let g:regex_efmt_config = ["(.+):([0-9]+):(.+$)", [1, 2, 3], "make.+Entering directory [`'](.+)'"] |
             \ execute(":REefmt " . <f-args>)
 
 "
