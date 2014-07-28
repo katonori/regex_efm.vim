@@ -21,7 +21,7 @@ let s:tmpFile = tempname()
 "
 command! -nargs=1 -complete=file REefm :call <SID>ParserError(<f-args>)
 command! -nargs=1 -complete=file REefmVS 
-            \ :let g:regex_efm_config = ['1>(.+)\(([0-9]+)\):(.+$)', [1, 2, 3], ''] |
+            \ :let g:regex_efm_config = ['[0-9]+>(.+)\(([0-9]+)(,[0-9]+)?\):(.+$)', [1, 2, 4], ''] |
             \ execute(":REefm " . <f-args>)
 command! -nargs=1 -complete=file REefmMK 
             \ :let g:regex_efm_config = ["(.+):([0-9]+):(.+$)", [1, 2, 3], "make.+Entering directory [`'](.+)'"] |
