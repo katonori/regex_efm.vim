@@ -24,22 +24,22 @@ def WinDirname(str):
         return (m.group(1), m.group(2))
     return None
 
-def ParseErrorLog(infile, pattern, order, dir_pattern):
+def ParseErrorLog(lines, pattern, order, dir_pattern):
     #errorPatter, patternOrder, dirCapture = pattern
     errorPatter, patternOrder, dirCapture = (pattern, order, dir_pattern)
     projdir = u"";
     errorList = []
-    f = open(infile, "r")
-    for line in f.readlines():
+    for l in lines:
+        #print l
         if dirCapture != "":
-            m = re.search(dirCapture, line)
+            m = re.search(dirCapture, l)
             if m:
                 projdir = m.group(1) + os.path.sep
-                #projdir = WinDirname(line)
+                #projdir = WinDirname(l)
                 DEBUG_PRINT("curDir: " + projdir)
                 continue
         # parse error massage
-        m = re.search(errorPatter, line)
+        m = re.search(errorPatter, l)
         if m:
             filename = m.group(int(patternOrder[0]))
             lineNo = m.group(int(patternOrder[1]))
@@ -48,19 +48,20 @@ def ParseErrorLog(infile, pattern, order, dir_pattern):
                 filename = projdir + filename
             errorList.append((filename, lineNo, errorMsg))
             continue
-    lines = []
+    result = []
     for i in errorList:
         fn, lineNo, msg = i
         msg = u"%s:%s:%s"%(fn, lineNo, msg.decode("utf-8"))
         #print msg.encode("utf-8")
-        lines.append(msg.encode("utf-8"))
-    return lines
+        result.append(msg.encode("utf-8"))
+    return result
+
+def ParseErrorLogFromFile(infile, pattern, order, dir_pattern):
+    f = open(infile, "r")
+    return ParseErrorLog(f.readlines(), pattern, order, dir_pattern)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print "usage: cmd file"
         sys.exit(1)
     fn = sys.argv[1]
-    lines = ParseErrorLog(fn)
-    for l in lines:
-        print l
