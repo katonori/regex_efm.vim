@@ -20,40 +20,40 @@ def WinDirname(str):
         return (m.group(1), m.group(2))
     return None
 
-def ParseErrorLog(lines, pattern, order, dir_pattern):
-    #errorPatter, patternOrder, dirCapture = pattern
-    errorPatter, patternOrder, dirCapture = (pattern, order, dir_pattern)
-    projdir = u"";
+def ParseErrorLog(lines, pattern):
+    errorPatter = pattern
+    curDir = u"";
     errorList = []
-    if dirCapture != "":
-        for l in lines:
-            m = re.search(dirCapture, l)
-            if m:
-                projdir = m.group(1) + os.path.sep
-                #projdir = WinDirname(l)
-                DEBUG_PRINT("curDir: " + projdir)
+    linesStr = "".join(lines)
+    mList = re.finditer(pattern, linesStr, re.MULTILINE)
+    for m in mList:
+        # dirname
+        try:
+            dirname = m.group("dir")
+            if dirname != None:
+                curDir = dirname + os.path.sep
                 continue
-            # parse error massage
-            m = re.search(errorPatter, l)
-            if m:
-                filename = m.group(int(patternOrder[0]))
-                lineNo = m.group(int(patternOrder[1]))
-                errorMsg = m.group(int(patternOrder[2]))
-                if not os.path.isabs(filename):
-                    filename = projdir + filename
-                errorList.append((filename, lineNo, errorMsg))
-                continue
-    else:
-        linesStr = "".join(lines)
-        mList = re.findall(pattern, linesStr, re.MULTILINE)
-        for m in mList:
-            filename = m[int(patternOrder[0])-1]
-            lineNo = m[int(patternOrder[1])-1]
-            errorMsg = m[int(patternOrder[2])-1]
-            errorMsg = errorMsg.replace("\n", "|")
+        except IndexError: 
+            None
+        # filename
+        try:
+            filename = m.group("file")
             if not os.path.isabs(filename):
-                filename = projdir + filename
-            errorList.append((filename, lineNo, errorMsg))
+                filename = curDir + filename
+        except IndexError: 
+            filename = ""
+        # line number
+        try:
+            lineNo = m.group("line")
+        except IndexError: 
+            lineNo = ""
+        # error message
+        try:
+            errorMsg = m.group("msg")
+        except IndexError: 
+            errorMsg = ""
+        errorMsg = errorMsg.replace("\n", "|")
+        errorList.append((filename, lineNo, errorMsg))
     result = []
     for i in errorList:
         fn, lineNo, msg = i
@@ -62,18 +62,21 @@ def ParseErrorLog(lines, pattern, order, dir_pattern):
         result.append(msg.encode("utf-8"))
     return result
 
-def ParseErrorLogFromFile(infile, pattern, order, dir_pattern):
+def ParseErrorLogFromFile(infile, pattern):
     f = open(infile, "r")
-    return ParseErrorLog(f.readlines(), pattern, order, dir_pattern)
+    return ParseErrorLog(f.readlines(), pattern)
 
 if __name__ == "__main__":
 #pattern= (r"1>(.+)\(([0-9]+)\):(.+$)", [1, 2, 3], r"\"(.+vcxproj)\"")
 #pattern= (r"1>(.+)\(([0-9]+)\):(.+$)", [1, 2, 3], r"")
 #pattern= (r"(.+):([0-9]+):(.+$)", [1, 2, 3], r"make: Entering directory '(.+)'")
-    pattern = ('^\s*File\s+"(.+)", line ([0-9]+), in .+$\s+(.+\n\S+.+|.+$)', [1, 2, 3], '')
-
+    pattern = '^\s*File\s+"(?P<file>.+)", line (?P<line>[0-9]+), in .+$\s+(?P<msg>.+\n\S+.+|.+$)'
+    #pattern = "(?P<file>.+):(?P<line>[0-9]+):(?P<msg>.+$)|make.+Entering directory [`'](?P<dir>.+)'"
+    #pattern = "(?P<file>.+):(?P<line>[0-9]+):(?P<msg>.+$)|make.+Entering directory [`'](?P<dir>.+)'"
+    #pattern = '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,[0-9]+)?\):(?P<msg>.+$)'
     if len(sys.argv) != 2:
         print "usage: cmd file"
         sys.exit(1)
     fn = sys.argv[1]
-    ParseErrorLogFromFile(fn, pattern[0], pattern[1], pattern[2])
+    for l in ParseErrorLogFromFile(fn, pattern):
+        print l
