@@ -39,16 +39,21 @@ Some additional commands are defined as a preset.
 * REefmVS 
     * Set g:regex\_efm\_config like below and run REefm.
       This is for processing error log of Visual Studio C++.
-        * '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,[0-9]+)?\):(?P<msg>.+$)' 
+
+                '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,[0-9]+)?\):(?P<msg>.+$)' 
+
 * REefmVSC 
     * Set g:regex\_efm\_config like below and run REefmC.
       This is for processing error log of Visual Studio C++.
-        * '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,[0-9]+)?\):(?P<msg>.+$)'
+
+                '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,[0-9]+)?\):(?P<msg>.+$)'
 * REefmMK 
     * Set g:regex\_efm\_config like below and run REefm.
       This is for processing error log of unix make with gcc.
-        * "(?P<file>.+):(?P<line>[0-9]+):(?P<msg>.+$)|make.+Entering directory [`'](?P<dir>.+)'"
+        
+                "(?P<file>.+):(?P<line>[0-9]+):(?P<msg>.+$)|make.+Entering directory [`'](?P<dir>.+)'"
 * REefmPY 
     * Set g:regex\_efm\_config like below and run REefm.
       This is for processing error log of python.
-        * '^\s*File\s+"(?P<file>.+)", line (?P<line>[0-9]+), in .+$\s+(?P<msg>.+\n\S+.+|.+$)'
+      
+                '^\s*File\s+"(?P<file>.+)", line (?P<line>[0-9]+), in .+$\s+(?P<msg>.+\n\S+.+|.+$)'
