@@ -6,10 +6,6 @@ import re
 import os
 import tempfile
 
-#pattern= (r"1>(.+)\(([0-9]+)\):(.+$)", [1, 2, 3], r"\"(.+vcxproj)\"")
-#pattern= (r"1>(.+)\(([0-9]+)\):(.+$)", [1, 2, 3], r"")
-#pattern= (r"(.+):([0-9]+):(.+$)", [1, 2, 3], r"make: Entering directory '(.+)'")
-
 #gDebugMode = 1
 gDebugMode = 0
 
@@ -29,25 +25,35 @@ def ParseErrorLog(lines, pattern, order, dir_pattern):
     errorPatter, patternOrder, dirCapture = (pattern, order, dir_pattern)
     projdir = u"";
     errorList = []
-    for l in lines:
-        #print l
-        if dirCapture != "":
+    if dirCapture != "":
+        for l in lines:
             m = re.search(dirCapture, l)
             if m:
                 projdir = m.group(1) + os.path.sep
                 #projdir = WinDirname(l)
                 DEBUG_PRINT("curDir: " + projdir)
                 continue
-        # parse error massage
-        m = re.search(errorPatter, l)
-        if m:
-            filename = m.group(int(patternOrder[0]))
-            lineNo = m.group(int(patternOrder[1]))
-            errorMsg = m.group(int(patternOrder[2]))
+            # parse error massage
+            m = re.search(errorPatter, l)
+            if m:
+                filename = m.group(int(patternOrder[0]))
+                lineNo = m.group(int(patternOrder[1]))
+                errorMsg = m.group(int(patternOrder[2]))
+                if not os.path.isabs(filename):
+                    filename = projdir + filename
+                errorList.append((filename, lineNo, errorMsg))
+                continue
+    else:
+        linesStr = "".join(lines)
+        mList = re.findall(pattern, linesStr, re.MULTILINE)
+        for m in mList:
+            filename = m[int(patternOrder[0])-1]
+            lineNo = m[int(patternOrder[1])-1]
+            errorMsg = m[int(patternOrder[2])-1]
+            errorMsg = errorMsg.replace("\n", "|")
             if not os.path.isabs(filename):
                 filename = projdir + filename
             errorList.append((filename, lineNo, errorMsg))
-            continue
     result = []
     for i in errorList:
         fn, lineNo, msg = i
@@ -61,7 +67,13 @@ def ParseErrorLogFromFile(infile, pattern, order, dir_pattern):
     return ParseErrorLog(f.readlines(), pattern, order, dir_pattern)
 
 if __name__ == "__main__":
+#pattern= (r"1>(.+)\(([0-9]+)\):(.+$)", [1, 2, 3], r"\"(.+vcxproj)\"")
+#pattern= (r"1>(.+)\(([0-9]+)\):(.+$)", [1, 2, 3], r"")
+#pattern= (r"(.+):([0-9]+):(.+$)", [1, 2, 3], r"make: Entering directory '(.+)'")
+    pattern = ('^\s*File\s+"(.+)", line ([0-9]+), in .+$\s+(.+\n\S+.+|.+$)', [1, 2, 3], '')
+
     if len(sys.argv) != 2:
         print "usage: cmd file"
         sys.exit(1)
     fn = sys.argv[1]
+    ParseErrorLogFromFile(fn, pattern[0], pattern[1], pattern[2])

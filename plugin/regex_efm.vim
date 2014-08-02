@@ -30,6 +30,9 @@ command! -nargs=0 -complete=file REefmVSC
 command! -nargs=1 -complete=file REefmMK 
             \ :let g:regex_efm_config = ["(.+):([0-9]+):(.+$)", [1, 2, 3], "make.+Entering directory [`'](.+)'"] |
             \ execute(":REefm " . <f-args>)
+command! -nargs=1 -complete=file REefmPY 
+            \ :let g:regex_efm_config = ['^\s*File\s+"(.+)", line ([0-9]+), in .+$\s+(.+\n\S+.+|.+$)', [1, 2, 3], ''] |
+            \ execute(":REefm " . <f-args>)
 
 "
 " run parser
