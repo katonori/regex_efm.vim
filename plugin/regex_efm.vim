@@ -106,10 +106,7 @@ sys.path.append(vim.eval("s:dirName"))
 import regex_efm
 
 def func():
-    lines = regex_efm.ParseErrorLog(vim.eval('@*').split("\n"),
-        vim.eval("g:regex_efm_config[0]"),
-        vim.eval("g:regex_efm_config[1]"),
-        vim.eval("g:regex_efm_config[2]"))
+    lines = regex_efm.ParseErrorLog(vim.eval('@*'), vim.eval("g:regex_efm_config"))
     fn = vim.eval("s:tmpFile")
     f = open(fn, "w")
     for l in lines:

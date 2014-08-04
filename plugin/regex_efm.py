@@ -44,11 +44,10 @@ def WinDirname(str):
         return (m.group(1), m.group(2))
     return None
 
-def ParseErrorLog(lines, pattern):
+def ParseErrorLog(linesStr, pattern):
     errorPatter = pattern
     curDir = u"";
     errorList = []
-    linesStr = "".join(lines)
     mList = re.finditer(pattern, linesStr, re.MULTILINE)
     for m in mList:
         # dirname
@@ -88,7 +87,9 @@ def ParseErrorLog(lines, pattern):
 
 def ParseErrorLogFromFile(infile, pattern):
     f = open(infile, "r")
-    return ParseErrorLog(f.readlines(), pattern)
+    ret = ParseErrorLog(f.read(), pattern)
+    f.close()
+    return ret
 
 if __name__ == "__main__":
     pattern = '^\s*File\s+"(?P<file>.+)", line (?P<line>[0-9]+), in .+$\s+(?P<msg>.+\n\S+.+|.+$)'
