@@ -64,23 +64,36 @@ def ParseErrorLog(linesStr, pattern):
             if not os.path.isabs(filename):
                 filename = curDir + filename
         except IndexError: 
+            filename = None
+        if filename == None:
             filename = ""
         # line number
         try:
             lineNo = m.group("line")
         except IndexError: 
-            lineNo = ""
+            lineNo = None
+        if lineNo == None:
+            lineNo = "0"
+        # column number
+        try:
+            colNo = m.group("col")
+        except IndexError: 
+            colNo = None
+        if colNo == None:
+            colNo = "0"
         # error message
         try:
             errorMsg = m.group("msg")
         except IndexError: 
+            errorMsg = None
+        if errorMsg == None:
             errorMsg = ""
         errorMsg = errorMsg.replace("\n", "|")
-        errorList.append((filename, lineNo, errorMsg))
+        errorList.append((filename, lineNo, colNo, errorMsg))
     result = []
     for i in errorList:
-        fn, lineNo, msg = i
-        msg = u"%s:%s:%s"%(fn, lineNo, msg.decode("utf-8"))
+        fn, lineNo, colNo, msg = i
+        msg = u"%s:%s:%s:%s"%(fn, lineNo, colNo, msg.decode("utf-8"))
         #print msg.encode("utf-8")
         result.append(msg.encode("utf-8"))
     return result

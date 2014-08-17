@@ -46,13 +46,13 @@ let s:tmpFile = tempname()
 command! -nargs=1 -complete=file REefm :call <SID>ParserErrorFromFile(<f-args>)
 command! -nargs=0 -complete=file REefmC :call <SID>ParserErrorFromClipboard()
 command! -nargs=1 -complete=file REefmVS 
-            \ :let g:regex_efm_config = '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,[0-9]+)?\):(?P<msg>.+$)' |
+            \ :let g:regex_efm_config = '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,(?P<col>[0-9]+))?\):(?P<msg>.+$)' |
             \ execute(":REefm " . <f-args>)
 command! -nargs=0 -complete=file REefmVSC 
-            \ :let g:regex_efm_config = '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,[0-9]+)?\):(?P<msg>.+$)' |
+            \ :let g:regex_efm_config = '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,(?P<col>[0-9]+))?\):(?P<msg>.+$)' |
             \ execute(":REefmC")
 command! -nargs=1 -complete=file REefmMK 
-            \ :let g:regex_efm_config = "(?P<file>.+):(?P<line>[0-9]+):(?P<msg>.+$)|make.+Entering directory [`'](?P<dir>.+)'" |
+            \ :let g:regex_efm_config = "(?P<file>.+):(?P<line>[0-9]+):(?P<col>[0-9]+):(?P<msg>.+$)|make.+Entering directory [`'](?P<dir>.+)'" |
             \ execute(":REefm " . <f-args>)
 command! -nargs=1 -complete=file REefmPY 
             \ :let g:regex_efm_config = '^\s*File\s+"(?P<file>.+)", line (?P<line>[0-9]+), in .+$\s+(?P<msg>.+\n\S+.+|.+$)' |
@@ -82,7 +82,7 @@ def func():
         l = l.replace("\r", "")
         f.write(l + "\n")
     f.close()
-    vim.command("setlocal errorformat=%f:%l:%m")
+    vim.command("setlocal errorformat=%f:%l:%c:%m")
     vim.command("cgetfile " + fn)
     vim.command("cwin ")
 # run
@@ -114,7 +114,7 @@ def func():
         l = l.replace("\r", "")
         f.write(l + "\n")
     f.close()
-    vim.command("setlocal errorformat=%f:%l:%m")
+    vim.command("setlocal errorformat=%f:%l:%c:%m")
     vim.command("cgetfile " + fn)
     vim.command("cwin ")
 # run
