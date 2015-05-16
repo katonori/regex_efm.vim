@@ -36,6 +36,14 @@ if !exists("g:regex_efm_config")
     let g:regex_efm_config = ''
 endif
 
+if !exists("g:regex_efm_make_command")
+    let g:regex_efm_make_command = 'make'
+endif
+
+if !exists("g:regex_efm_shell_redir")
+    let g:regex_efm_shell_redir = '2>&1 | tee '
+endif
+
 let s:scriptName = expand('<sfile>:p')
 let s:dirName = fnamemodify(s:scriptName, ":h") 
 let s:tmpFile = tempname()
@@ -44,6 +52,7 @@ let s:tmpFile = tempname()
 " define commands
 "
 command! -nargs=1 -complete=file REefm :call <SID>ParserErrorFromFile(<f-args>)
+command! -nargs=0 -complete=file REefmMake :call <SID>ParseMakeOutput()
 command! -nargs=0 -complete=file REefmC :call <SID>ParserErrorFromClipboard()
 command! -nargs=1 -complete=file REefmVS 
             \ :let g:regex_efm_config = '[0-9]+>(?P<file>.+)\((?P<line>[0-9]+)(,(?P<col>[0-9]+))?\):(?P<msg>.+$)' |
@@ -62,7 +71,7 @@ command! -nargs=1 -complete=file REefmPY
 " run parser
 "
 function! s:ParserErrorFromFile(logfile)
-    if g:regex_efm_config[0] == ""
+    if g:regex_efm_config == ""
         echo "Error: set g:regex_efm_config correctlly"
         finish
     endif
@@ -91,11 +100,49 @@ func()
 EOF
 endfunction
 
+function! s:LoadFilteredResult(logfile)
+    setlocal errorformat=%f:%l:%c:%m
+    execute("cgetfile " . a:logfile)
+    cwin
+endfunction
+
+function! s:ParseMakeOutput()
+    if g:regex_efm_config == ""
+        let g:regex_efm_config = "(?P<file>.+):(?P<line>[0-9]+):(?P<col>[0-9]+):(?P<msg>.+$)|make.+Entering directory [`'](?P<dir>.+)'" |
+    endif
+
+    " run make
+    let l:make_log = tempname()
+    execute(":!" . g:regex_efm_make_command . " ". g:regex_efm_shell_redir . " " . l:make_log)
+
+python << EOF
+# add script directory to search path
+import vim, sys
+sys.path.append(vim.eval("s:dirName"))
+import regex_efm
+
+def func():
+    logfile = vim.eval("l:make_log")
+    lines = regex_efm.ParseErrorLogFromFile(logfile, vim.eval("g:regex_efm_config"))
+    fn = vim.eval("s:tmpFile")
+    f = open(fn, "w")
+    for l in lines:
+        l = l.replace("\n", "")
+        l = l.replace("\r", "")
+        f.write(l + "\n")
+    f.close()
+    vim.command("call s:LoadFilteredResult(\"" + fn + "\")")
+# run
+func()
+
+EOF
+endfunction
+
 "
 " run parser
 "
 function! s:ParserErrorFromClipboard()
-    if g:regex_efm_config[0] == ""
+    if g:regex_efm_config == ""
         echo "Error: set g:regex_efm_config correctlly"
         finish
     endif
@@ -114,9 +161,7 @@ def func():
         l = l.replace("\r", "")
         f.write(l + "\n")
     f.close()
-    vim.command("setlocal errorformat=%f:%l:%c:%m")
-    vim.command("cgetfile " + fn)
-    vim.command("cwin ")
+    vim.command("call s:LoadFilteredResult(\"" + fn + "\")")
 # run
 func()
 
