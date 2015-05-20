@@ -9,6 +9,10 @@ regex\_efm.vim
 変数 "g:regex\_efm\_config" にpythonの正規表現でerrorformatを設定し、
 下記の通りコマンドを実行します。
 
+        :REefmMake
+
+        もしくは 
+
         :REefm file.log
 
 そうするとファイルがパースされ、その結果検出されたエラー箇所がロードされ
@@ -33,9 +37,12 @@ vim pluginに正規表現のどの箇所がどのような情報なのかは、�
 コマンド
 ==========
 
+* REefmMake
+    * :makeを実行し、その結果をg:regex\_efm\_config の内容にしたがって処理し、
+      、エラーが検出されたらquickfixウィンドウを開きます。
 * REefm file.log
-    * g:regex\_efm\_config の内容にしたがいログファイルを処理し、エラー箇所を検出
-      し、エラー箇所が発見されたらquickfixウィンドウを開きます。
+    * g:regex\_efm\_config の内容にしたがいログファイルを処理し、エラーが検出
+      されたらquickfixウィンドウを開きます。
 * REefmC
     * 入力がクリップボードから得られること以外はREefmと同じです。
 

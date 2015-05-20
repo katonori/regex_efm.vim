@@ -11,6 +11,10 @@ in python regular expression format. And run
 
         :REefm file.log
 
+        or 
+
+        :REefmMake
+
 Then error positions are loaded and quickfix buffer will be opened.
 
 Regular expression syntax
@@ -28,6 +32,9 @@ Below is a configuration example for log of gcc with unix make.
 Commands
 ==========
 
+* REefmMake
+    * Run :make and process its result according to configuration specified by g:regex\_efm\_config and open
+      quickfix window if some parts matches with a regular expression pattern.
 * REefm file.log
     * Process file.log according to configuration specified by g:regex\_efm\_config and open
       quickfix window if some parts matches with a regular expression pattern.
